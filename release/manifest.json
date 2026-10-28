@@ -97,8 +97,8 @@
           "f1040e2ff7d00f9bfbe32dd08518cc1e349295bba5703629efa53cab48ea26cb",
           "f541724ae609e4112720706626af1e2906a023a47ee4a128d2c7835ca61a1158"
         ],
-        "package_sha256": "",
-        "package_size": 0
+        "package_sha256": "ecd7d78d168c2634eabc810b26bfe340d9ca5d0addd591d6a0df563c4b618268",
+        "package_size": 333000
       },
       "linux": {}
     }
