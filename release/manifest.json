@@ -100,7 +100,102 @@
         "package_sha256": "ecd7d78d168c2634eabc810b26bfe340d9ca5d0addd591d6a0df563c4b618268",
         "package_size": 333000
       },
-      "linux": {}
+      "linux": {
+        "aarch64": {
+          "files": [
+            {
+              "name": "LICENSE",
+              "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+              "size": 35149,
+              "mode": 420
+            },
+            {
+              "name": "THIRD_PARTY_NOTICES.md",
+              "sha256": "ffca5fdba4cb72ad7aa544f22de9150cd5131d864b19e7437453fd7306516c29",
+              "size": 8972,
+              "mode": 420
+            },
+            {
+              "name": "futari",
+              "sha256": "47d06ae68320fff6abbe747f906acbe0db81bd79a5cdc1824f891c106b1d56eb",
+              "size": 15505696,
+              "mode": 493
+            },
+            {
+              "name": "futari.sh",
+              "sha256": "03fdb9f44fe507dfae8d354c74d710973c97e508e03a958394d06c959a4d0ee6",
+              "size": 125,
+              "mode": 493
+            },
+            {
+              "name": "futari.toml",
+              "sha256": "d5cd84074efd40949044f096ad461adb9e3440b3e787820086bf0e83c8b794a4",
+              "size": 746,
+              "mode": 420
+            },
+            {
+              "name": "libfutari_hirow_abnormal.so",
+              "sha256": "0be7fd02bbc8d56cab94e4837a332f88765662c60856292c9934e96076a7724a",
+              "size": 7872616,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_hirow_normal.so",
+              "sha256": "3a67dd229e98fb2b70c6680029ff05db0b617777cfc11932c344f83e62c9bfd5",
+              "size": 7864672,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_kiniro_abnormal.so",
+              "sha256": "ccf7473b5100b76f308f61655dfa539a964614766b6b6ab559db48a827006240",
+              "size": 7876976,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_kiniro_normal.so",
+              "sha256": "6d8f660d960586a536c4022798a9a348c725b0ca9a1760499917eec55a913232",
+              "size": 7872632,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_palm_abnormal.so",
+              "sha256": "9af218d2c2ef494f3da75c22d3b3659b3302acc6daef1b9b148f3bb5893d77e2",
+              "size": 7965160,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_palm_normal.so",
+              "sha256": "2e123c7bc82825c6b858d5f02e7d1a0a765bfaba41ce29172ae38a1f0f96294f",
+              "size": 7970912,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_reco_abnormal.so",
+              "sha256": "54db5a72767520eaca5b6d7dff4791ffe370d552edfdaaeb657723ad4cf8ba8f",
+              "size": 7874936,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_reco_normal.so",
+              "sha256": "35db33682a8a88b00e0c45f4528d7c4110e82e553808dbcaca4f882c734f9f26",
+              "size": 7864256,
+              "mode": 493
+            },
+            {
+              "name": "librexgpu-xenos.so",
+              "sha256": "82b85018631b54e85ac40e77a40c57d04ab612f0738bea8a09656f06fc74378f",
+              "size": 5310904,
+              "mode": 493
+            },
+            {
+              "name": "librexruntime.so",
+              "sha256": "2f8c85a7fd53c7a41893d12b21d6dd0743e2acef0975b8a39a2e226d727efbfb",
+              "size": 13109216,
+              "mode": 493
+            }
+          ]
+        }
+      }
     }
   ]
 }
