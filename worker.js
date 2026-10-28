@@ -1,11 +1,8 @@
 // Runs the whole package build off the main thread and streams the zip to the download service worker.
-import createHlslModule from './wasm/hlsl.mjs';
 import createDxcModule from './wasm/dxc_web.mjs';
-import createPackModule from './wasm/pack.mjs';
 import createLzxModule from './wasm/lzx.mjs';
 import createRenutHlslModule from './wasm/renut_hlsl.mjs';
-import createSpirvCrossModule from './wasm/spirv_cross.mjs';
-import { createPackage, findGame, identifyGame, programPath } from './lib/installer.js';
+import { createPackage, findGame, identifyGame, programFiles, programPath } from './lib/installer.js';
 import { setLanguage, t } from './lib/i18n.js';
 
 const log = (text) => postMessage({ type: 'log', text });
@@ -91,34 +88,30 @@ self.onmessage = async ({ data }) => {
     if (!build) {
       throw new Error(t('notSupportedYet', { hash: xexHash }));
     }
-    log(t('downloadingBuild'));
-    // futari-nx 1.0.1 on: the deko3d renderer's shaders ("deko3d" in the build's entry) and no native shader library
-    // ("shader_library": false); each set of tools is downloaded only for a build that needs it.
-    const withLibrary = build.shader_library !== false;
-    const [nro, licenses, shaderCommon, renutShaderCommon] = await Promise.all([
-      fetchBytes(programPath(build)),
-      fetchBytes('./release/LICENSES.txt'),
-      withLibrary ? fetchBytes('./shader_common.h') : null,
-      // the deko3d renderer's translator header (futari-nx's app/thirdparty/reblue-XenosRecomp/XenosRecomp/)
-      build.deko3d ? fetchBytes('./renut_shader_common.h') : null,
+    const files = programFiles(build, data.arch);
+    if (!files) {
+      throw new Error(t('noBuildForArch', { arch: data.arch }));
+    }
+    log(t('downloadingBuild', { arch: data.arch }));
+    const [renutShaderCommon, ...bytes] = await Promise.all([
+      // Renut's translator header (futari-linux's app/thirdparty/reblue-XenosRecomp/XenosRecomp/)
+      fetchBytes('./renut_shader_common.h'),
+      ...files.map((f) => fetchBytes(programPath(data.arch, f))),
     ]);
-    const nroHash = await sha256(nro);
-    if (nroHash !== build.nro_sha256) {
-      throw new Error(t('buildMismatch', { hash: nroHash }));
+    const program = [];
+    for (let i = 0; i < files.length; i++) {
+      const hash = await sha256(bytes[i]);
+      if (hash !== files[i].sha256) {
+        throw new Error(t('buildMismatch', { name: files[i].name, hash }));
+      }
+      program.push({ name: files[i].name, bytes: bytes[i], mode: files[i].mode ?? 0o644 });
     }
     const modules = {
       dxc: await createDxcModule(quiet()),
       lzx: await createLzxModule(quiet()),
+      renutHlsl: await createRenutHlslModule(quiet()),
     };
-    if (withLibrary) {
-      modules.hlsl = await createHlslModule(quiet());
-      modules.pack = await createPackModule(quiet());
-    }
-    if (build.deko3d) {
-      modules.renutHlsl = await createRenutHlslModule(quiet());
-      modules.spirvCross = await createSpirvCrossModule(quiet());
-    }
-    const release = { manifest, nro, licenses, shaderCommon, renutShaderCommon };
+    const release = { manifest, arch: data.arch, program, renutShaderCommon };
     const result = await createPackage(chosen, release, modules, sink, log, progress,
       (size) => postMessage({ type: 'size', size }), { update: Boolean(data.update) });
     postMessage({ type: 'done', result });

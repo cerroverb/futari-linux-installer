@@ -1,12 +1,13 @@
 // Serves the zip that the page generates as a regular browser download, and keeps a copy of the page, its tools and
 // the program once the player has chosen their game, so a package can still be made without a connection.
-// From nfsmw-nx-installer's sw.js (StevensND, GPL-3.0), with the file list of this page.
+// From nfsmw-nx-installer's sw.js (StevensND, GPL-3.0) through futari-nx-installer's, with the file list of this page.
 // The generator sends the zip through a MessagePort, one chunk per "pull", so memory use stays bounded however big
 // the zip is.
 
-const PAGE_CACHE = 'futari-nx-page';
-const PROGRAM_CACHE = 'futari-nx-programs';
-// Everything the page needs to make a package except the program (about 73 MB, kept once it is used).
+const PAGE_CACHE = 'futari-linux-page';
+const PROGRAM_CACHE = 'futari-linux-programs';
+// Everything the page needs to make a package except the program (the Linux build of each processor, kept once it is
+// used).
 const PAGE_FILES = [
   './',
   'index.html',
@@ -16,7 +17,6 @@ const PAGE_FILES = [
   'icons/icon-32.png',
   'icons/icon-192.png',
   'icons/apple-touch-icon.png',
-  'shader_common.h',
   'renut_shader_common.h',
   'lib/deko3d.js',
   'lib/deko3d_glsl.js',
@@ -27,23 +27,17 @@ const PAGE_FILES = [
   'lib/installer.js',
   'lib/shaders.js',
   'lib/stfs.js',
+  'lib/vulkan.js',
   'lib/xdvdfs.js',
   'lib/xex.js',
   'lib/zip.js',
   'wasm/dxc_web.mjs',
   'wasm/dxc_web.wasm',
-  'wasm/hlsl.mjs',
-  'wasm/hlsl.wasm',
   'wasm/lzx.mjs',
   'wasm/lzx.wasm',
-  'wasm/pack.mjs',
-  'wasm/pack.wasm',
   'wasm/renut_hlsl.mjs',
   'wasm/renut_hlsl.wasm',
-  'wasm/spirv_cross.mjs',
-  'wasm/spirv_cross.wasm',
   'release/manifest.json',
-  'release/LICENSES.txt',
 ];
 // How long a page file waits for the network before the kept copy is used (the network still refreshes it).
 const NETWORK_WAIT = 4000;

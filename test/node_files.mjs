@@ -3,12 +3,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import createHlslModule from '../wasm/hlsl.mjs';
 import createDxcModule from '../wasm/dxc_web.mjs';
-import createPackModule from '../wasm/pack.mjs';
 import createLzxModule from '../wasm/lzx.mjs';
 import createRenutHlslModule from '../wasm/renut_hlsl.mjs';
-import createSpirvCrossModule from '../wasm/spirv_cross.mjs';
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -69,12 +66,9 @@ const loud = (tag) => ({ print: (t) => console.log(`[${tag}] ${t}`), printErr: (
 export async function loadModules(verbose = false) {
   const options = (tag) => (verbose ? loud(tag) : quiet());
   return {
-    hlsl: await createHlslModule(options('hlsl')),
     dxc: await createDxcModule(options('dxc')),
-    pack: await createPackModule(options('pack')),
     lzx: await createLzxModule(options('lzx')),
-    // the deko3d renderer's (lib/deko3d.js)
+    // the Vulkan renderer's (lib/vulkan.js)
     renutHlsl: await createRenutHlslModule(options('renut_hlsl')),
-    spirvCross: await createSpirvCrossModule(options('spirv_cross')),
   };
 }

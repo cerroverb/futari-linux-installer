@@ -1,8 +1,10 @@
 name: Deploy to GitHub Pages
 
-# The NRO is not in this repository: it is an asset (futari.nro) of a release of the futari-nx repository of the same
-# owner. Each deployment downloads it into release/, checks it against release/manifest.json and publishes the page
-# with it. Run it by hand (Actions > Deploy to GitHub Pages > Run workflow) after publishing a new release there.
+# The Linux builds are not in this repository: they are assets (futari-linux-aarch64.tar.gz and
+# futari-linux-x86_64.tar.gz, made by tools/linux/package.sh --release) of a release of the futari-linux repository of
+# the same owner. Each deployment downloads them, extracts them into release/<arch>/, checks every file against
+# release/manifest.json and publishes the page with them. Run it by hand (Actions > Deploy to GitHub Pages > Run
+# workflow) after publishing a new release there.
 
 on:
   push:
@@ -10,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release of futari-nx to take the NRO from (empty for the latest)
+        description: Release of futari-linux to take the builds from (empty for the latest)
         required: false
         default: ''
 
@@ -36,24 +38,30 @@ jobs:
         with:
           node-version: 22
 
-      - name: Download the NRO of the release
+      - name: Download the Linux builds of the release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag }}
-          REPO: ${{ github.repository_owner }}/futari-nx
-        run: gh release download $TAG --repo "$REPO" --pattern 'futari.nro' --dir release --clobber
-
-      - name: Check it against the list of builds
-        run: node .github/verify_release.mjs
-
-      - name: Check the page's own code
+          REPO: ${{ github.repository_owner }}/futari-linux
         run: |
-          node test/texts_node.mjs
+          mkdir -p downloads
+          gh release download $TAG --repo "$REPO" --pattern 'futari-linux-*.tar.gz' --dir downloads --clobber
+          for arch in aarch64 x86_64; do
+            if [ -f "downloads/futari-linux-$arch.tar.gz" ]; then
+              mkdir -p "release/$arch"
+              tar -xzf "downloads/futari-linux-$arch.tar.gz" -C "release/$arch" --strip-components=1
+            fi
+          done
+
+      - name: Check them against the list of builds
+        run: node tools/linux_manifest.mjs check
 
       - name: Assemble the site
         run: |
           mkdir _site
-          cp -r index.html app.js worker.js sw.js icons shader_common.h renut_shader_common.h lib wasm release _site/
+          cp -r index.html app.js worker.js sw.js icons renut_shader_common.h lib release _site/
+          mkdir _site/wasm
+          cp wasm/dxc_web.mjs wasm/dxc_web.wasm wasm/lzx.mjs wasm/lzx.wasm wasm/renut_hlsl.mjs wasm/renut_hlsl.wasm _site/wasm/
 
       - uses: actions/configure-pages@v5
 

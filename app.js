@@ -1,4 +1,4 @@
-import { findGame, identifyGame, programPath } from './lib/installer.js';
+import { ARCHES, findGame, identifyGame, programFiles, programPath } from './lib/installer.js';
 import { FLAGS } from './lib/flags.js';
 import { LANGUAGES, formatSize, getLanguage, preferredLanguage, setLanguage, t } from './lib/i18n.js';
 
@@ -13,9 +13,11 @@ const detail = document.getElementById('detail');
 const fingerprint = document.getElementById('fingerprint');
 const languages = document.getElementById('languages');
 const sourceLink = document.getElementById('sourceLink');
+const archButtons = document.getElementById('arches');
 const TITLE = '虫姫さまふたり / Mushihimesama Futari';
 const manifest = fetch('./release/manifest.json').then((r) => r.json());
-const LANGUAGE_KEY = 'futari-nx.language';
+const LANGUAGE_KEY = 'futari-linux.language';
+const ARCH_KEY = 'futari-linux.arch';
 // the files the player chose ([{ path, file }]) and what was found in them
 let source = null;
 let check = 0;
@@ -27,10 +29,13 @@ let downloadFrame = null;
 let busy = false;
 // whether the chosen game has all its files (an extracted folder may not): otherwise only the update can be made
 let complete = false;
+// the build of the chosen game (its manifest entry) and the processor the package is made for
+let chosenBuild = null;
+let arch = 'x86_64';
 
-// On GitHub Pages (<owner>.github.io/<repository>) the source code is the owner's futari-nx repository.
+// On GitHub Pages (<owner>.github.io/<repository>) the source code is the owner's futari-linux repository.
 if (location.hostname.endsWith('.github.io')) {
-  sourceLink.href = `https://github.com/${location.hostname.split('.')[0]}/futari-nx`;
+  sourceLink.href = `https://github.com/${location.hostname.split('.')[0]}/futari-linux`;
 } else {
   sourceLink.removeAttribute('href');
 }
@@ -90,7 +95,11 @@ function renderDetected() {
       showDetected('', t('checking'));
       break;
     case 'supported':
-      showDetected('good', TITLE, t(v.dlc ? 'supportedWithDlc' : 'supported'));
+      if (!programFiles(chosenBuild, arch)) {
+        showDetected('bad', TITLE, t('noBuildForArch', { arch: t(`arch_${arch}`) }));
+      } else {
+        showDetected('good', TITLE, t(v.dlc ? 'supportedWithDlc' : 'supported'));
+      }
       break;
     case 'incomplete':
       showDetected('bad', TITLE, t('incompleteGame', { count: v.count, expected: v.expected }));
@@ -121,8 +130,74 @@ function applyLanguage(code) {
   for (const button of languages.querySelectorAll('button')) {
     button.setAttribute('aria-pressed', String(button.dataset.lang === getLanguage()));
   }
+  for (const button of archButtons.querySelectorAll('button')) {
+    button.textContent = t(`arch_${button.dataset.arch}`);
+  }
   renderChosen();
   renderDetected();
+}
+
+// The processor: the visitor's last choice, else what the browser says it runs on (Chromium tells through
+// userAgentData, Firefox through navigator.platform: "Linux aarch64", "Linux x86_64"), else x86-64.
+function detectArch() {
+  const platform = String(navigator.platform || '').toLowerCase();
+  if (/aarch64|arm64|armv8/.test(platform)) {
+    return 'aarch64';
+  }
+  return 'x86_64';
+}
+function setArch(value, remember = false) {
+  arch = ARCHES.includes(value) ? value : 'x86_64';
+  for (const button of archButtons.querySelectorAll('button')) {
+    button.setAttribute('aria-pressed', String(button.dataset.arch === arch));
+    button.classList.toggle('primary', button.dataset.arch === arch);
+  }
+  if (remember) {
+    try {
+      localStorage.setItem(ARCH_KEY, arch);
+    } catch {
+      // private windows and blocked storage: the choice just lasts for this visit
+    }
+  }
+  keepProgram();
+  setButtons(Boolean(source));
+  renderDetected();
+}
+for (const value of ARCHES) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.arch = value;
+  button.addEventListener('click', () => setArch(value, true));
+  archButtons.appendChild(button);
+}
+let savedArch = null;
+try {
+  savedArch = localStorage.getItem(ARCH_KEY);
+} catch {
+  savedArch = null;
+}
+arch = savedArch || detectArch();
+if (navigator.userAgentData?.getHighEntropyValues && !savedArch) {
+  navigator.userAgentData.getHighEntropyValues(['architecture']).then((v) => {
+    if (v.architecture === 'arm') {
+      setArch('aarch64');
+    } else if (v.architecture === 'x86') {
+      setArch('x86_64');
+    }
+  }, () => {});
+}
+
+// The program files of the chosen build for the chosen processor are kept by the browser as soon as both are known,
+// so the package can be made even if the connection drops.
+function keepProgram() {
+  const files = chosenBuild && programFiles(chosenBuild, arch);
+  if (!files) {
+    return;
+  }
+  for (const f of files) {
+    const url = new URL(programPath(arch, f), location.href).href;
+    helper.then((controller) => controller.postMessage({ type: 'keep-program', url }), () => {});
+  }
 }
 
 for (const { code, name, flag } of LANGUAGES) {
@@ -164,6 +239,7 @@ function asFiles(entries) {
 async function choose(entries, label = '') {
   const id = ++check;
   source = null;
+  chosenBuild = null;
   setButtons(false);
   chosenView = null;
   renderChosen();
@@ -185,14 +261,13 @@ async function choose(entries, label = '') {
       }
       if (game.build) {
         source = entries;
+        chosenBuild = game.build;
         complete = found.game.files.length >= game.build.game_files;
         detectedView = complete
           ? { kind: 'supported', dlc: found.dlc.length > 0 }
           : { kind: 'incomplete', count: found.game.files.length, expected: game.build.game_files };
         setButtons(true);
-        // the program is kept by the browser now, so the package can be made even if the connection drops
-        const url = new URL(programPath(game.build), location.href).href;
-        helper.then((controller) => controller.postMessage({ type: 'keep-program', url }), () => {});
+        keepProgram();
       } else {
         detectedView = { kind: 'unsupported', hash: game.xexHash };
       }
@@ -270,11 +345,12 @@ const helper = downloadHelper();
 helper.catch(() => {});
 
 function setButtons(enabled) {
-  create.disabled = !enabled || busy || !complete;
-  update.disabled = !enabled || busy;
+  const available = Boolean(chosenBuild && programFiles(chosenBuild, arch));
+  create.disabled = !enabled || busy || !complete || !available;
+  update.disabled = !enabled || busy || !available;
 }
 
-// update: only the program and the shaders, for a folder that is already on the SD card.
+// update: only the program and the shaders, for a folder that is already installed.
 async function makePackage(onlyUpdate) {
   if (!source || busy) {
     return;
@@ -286,7 +362,7 @@ async function makePackage(onlyUpdate) {
     log(t('error', { message: error.message === 'noStreaming' ? t('noStreaming') : error.message }), true);
     return;
   }
-  const filename = onlyUpdate ? 'futari-nx-update.zip' : 'futari-nx.zip';
+  const filename = onlyUpdate ? `futari-linux-${arch}-update.zip` : `futari-linux-${arch}.zip`;
   busy = true;
   setButtons(false);
   bar.hidden = false;
@@ -334,8 +410,11 @@ async function makePackage(onlyUpdate) {
     log(t('error', { message: event.message }), true);
     finish();
   };
-  worker.postMessage({ entries: source, lang: getLanguage(), update: onlyUpdate, port: channel.port1 }, [channel.port1]);
+  worker.postMessage({ entries: source, lang: getLanguage(), update: onlyUpdate, arch, port: channel.port1 },
+    [channel.port1]);
 }
 
 create.addEventListener('click', () => makePackage(false));
 update.addEventListener('click', () => makePackage(true));
+
+setArch(arch);
