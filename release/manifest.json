@@ -3,7 +3,7 @@
   "builds": [
     {
       "edition": "Xbox 360 disc (Mushihimesama Futari Ver 1.5)",
-      "version": "1.0.0-linux",
+      "version": "1.1.0-linux",
       "xex_sha256": "6e61934468463c8d023588a1e14b2269002dec6987b51538154843ea6869a434",
       "game_files": 52,
       "game_bytes": 841393788,
@@ -191,6 +191,100 @@
               "name": "librexruntime.so",
               "sha256": "2f8c85a7fd53c7a41893d12b21d6dd0743e2acef0975b8a39a2e226d727efbfb",
               "size": 13109216,
+              "mode": 493
+            }
+          ]
+        },
+        "x86_64": {
+          "files": [
+            {
+              "name": "LICENSE",
+              "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+              "size": 35149,
+              "mode": 420
+            },
+            {
+              "name": "THIRD_PARTY_NOTICES.md",
+              "sha256": "b43843922c3bf196404e3542a2dab6c52848791ba20f4c1b5018888938799eb4",
+              "size": 9095,
+              "mode": 420
+            },
+            {
+              "name": "futari",
+              "sha256": "ceb875d59cc7e3c139ba8a4e5ca2ff7ba5fae2d8965a2a34f4ac2df41e574b96",
+              "size": 22221152,
+              "mode": 493
+            },
+            {
+              "name": "futari.sh",
+              "sha256": "03fdb9f44fe507dfae8d354c74d710973c97e508e03a958394d06c959a4d0ee6",
+              "size": 125,
+              "mode": 493
+            },
+            {
+              "name": "futari.toml",
+              "sha256": "35c16eba0073c5b3d0fbffaba2e7c5549fbed828304e22e75e880072b2bcbcb2",
+              "size": 1154,
+              "mode": 420
+            },
+            {
+              "name": "libfutari_hirow_abnormal.so",
+              "sha256": "cec730fb4d25b14a6eace4141a5ff602b6393d9a07d139f52639730d767436d4",
+              "size": 10099448,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_hirow_normal.so",
+              "sha256": "11b70940c48323a57e9329f8e7b8aaf29bc706fe65cb00017f6fdf511857eb20",
+              "size": 10084912,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_kiniro_abnormal.so",
+              "sha256": "1774c8d7ede1603c076c3710da7521a79558c86d06a9172a80eb189f775edec6",
+              "size": 10111312,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_kiniro_normal.so",
+              "sha256": "47425b4ce0e27c84575f5da742a8fecde602794686ce5a1d9b83822cd1db7771",
+              "size": 10118304,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_palm_abnormal.so",
+              "sha256": "e5253b2476a575bb20a7c096fb0802bd05a9d39382569ee4f509d577382528bb",
+              "size": 10184272,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_palm_normal.so",
+              "sha256": "e5d3021b6f014d7475f4999cc23945307fc311571597454a5af4662e47a035af",
+              "size": 10232032,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_reco_abnormal.so",
+              "sha256": "649d0c8ef096882bb8a0df237ba29fd1a2b4f75a41eb238639bd0bc3f804ca18",
+              "size": 10133224,
+              "mode": 493
+            },
+            {
+              "name": "libfutari_reco_normal.so",
+              "sha256": "60b10dd5eabea60282557c0cf6662afaf87065c76ad64dabded196fd84ee333b",
+              "size": 10129776,
+              "mode": 493
+            },
+            {
+              "name": "librexgpu-xenos.so",
+              "sha256": "5049ce93797e2a5aaa653623eb7a278c9092976d81b3d91817012f8a03f9a586",
+              "size": 6544008,
+              "mode": 493
+            },
+            {
+              "name": "librexruntime.so",
+              "sha256": "ead4bfe8775b7c8c9a6a557657e5bcf82f570f1ef3cbbfcaa1b9bbd31e694320",
+              "size": 16992872,
               "mode": 493
             }
           ]
