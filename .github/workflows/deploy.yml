@@ -3,8 +3,9 @@ name: Deploy to GitHub Pages
 # The Linux builds are not in this repository: they are assets (futari-linux-aarch64.tar.gz and
 # futari-linux-x86_64.tar.gz, made by tools/linux/package.sh --release) of a release of the futari-linux repository of
 # the same owner. Each deployment downloads them, extracts them into release/<arch>/, checks every file against
-# release/manifest.json and publishes the page with them. Run it by hand (Actions > Deploy to GitHub Pages > Run
-# workflow) after publishing a new release there.
+# release/manifest.json and publishes the page with them. Without a tag it takes v1.1.0-linux: from 1.2.0 the
+# futari-linux releases are complete archives that set themselves up, and the installer-page builds of a newer release
+# are named futari-linux-installer-<arch>.tar.gz.
 
 on:
   push:
@@ -12,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release of futari-linux to take the builds from (empty for the latest)
+        description: Release of futari-linux to take the builds from (empty for v1.1.0-linux)
         required: false
         default: ''
 
@@ -41,7 +42,7 @@ jobs:
       - name: Download the Linux builds of the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag }}
+          TAG: ${{ inputs.tag || 'v1.1.0-linux' }}
           REPO: ${{ github.repository_owner }}/futari-linux
         run: |
           mkdir -p downloads
